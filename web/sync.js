@@ -10,7 +10,7 @@ function adoptCloud(s){const b=s.books.find(b=>b.id===state.bookId),p=b?.pages.f
 async function cloudFetch(options={}){const response=await fetch('/api/workspace',{...options,cache:'no-store',signal:AbortSignal.timeout(20000)});if(response.status===401){const e=new Error('auth');e.auth=true;throw e}return response}
 async function readCloud(){const r=await cloudFetch();if(!r.ok)throw Error('cloud_read');const d=await r.json();if(d.state&&!validState(d.state))throw Error('invalid_cloud_state');return d}
 async function syncCloud(initial=false){
- if(cloudBusy||(!cloudReady&&!initial)||(!initial&&(drag||$('#modal').open)))return;
+ if(cloudBusy||(!cloudReady&&!initial)||(cloudReady&&(drag||$('#modal').open||importingImages)))return;
  if(!navigator.onLine){cloudStatus('◉ ออฟไลน์ · เก็บในเครื่องแล้ว');return}
  cloudBusy=true;
  try{
@@ -32,7 +32,7 @@ async function syncCloud(initial=false){
   }
   cloudStatus(cloudDirty?'☁ รอซิงก์…':'☁ ซิงก์แล้ว · เปิดต่อได้ทุกเครื่อง');
  }catch(e){cloudStatus(e.auth?'กรุณาเข้าสู่ระบบใหม่':'◉ เก็บในเครื่องแล้ว · รอเชื่อมต่อคลาวด์');if(e.auth)$('#signInLink').hidden=false}
- finally{cloudBusy=false;if(initial){$('#cloudLoading').remove();cloudReady=true}if(cloudDirty){clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>syncCloud(),5000)}}
+ finally{cloudBusy=false;if(initial){$('#cloudLoading')?.remove();cloudReady=true}if(cloudDirty){clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>syncCloud(),5000)}}
 }
 $('#saveStatus').title='คลิกเพื่อตรวจสอบและซิงก์งาน';$('#saveStatus').style.cursor='pointer';$('#saveStatus').onclick=()=>syncCloud();
 window.addEventListener('online',()=>syncCloud(true));window.addEventListener('offline',()=>cloudStatus('◉ ออฟไลน์ · เก็บในเครื่องแล้ว'));
