@@ -2,7 +2,7 @@
 let groupIds=new Set(),groupPrimary=null;
 function selectedObjects(){if(selected!==groupPrimary){groupIds=new Set(selected?[selected]:[]);groupPrimary=selected}const objects=page().objects.filter(o=>groupIds.has(o.id));groupIds=new Set(objects.map(o=>o.id));return objects}
 function selectGroup(ids){groupIds=new Set(ids);selected=groupIds.values().next().value||null;groupPrimary=selected}
-function selectionBounds(o){if(o.type==='arrow'){const [a,b]=arrowPoints(o);return{x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(b.x-a.x),h:Math.abs(b.y-a.y)}}return bounds(o)}
+function selectionBounds(o){if(o.type==='arrow'){const [a,b]=arrowPoints(o);return rotatedObjectBounds({...o,x:a.x,y:a.y,w:b.x-a.x,h:b.y-a.y})}return bounds(o)}
 function groupBounds(objects){const boxes=objects.map(selectionBounds);const x=Math.min(...boxes.map(b=>Math.min(b.x,b.x+b.w))),y=Math.min(...boxes.map(b=>Math.min(b.y,b.y+b.h)));return{x,y,w:Math.max(...boxes.map(b=>Math.max(b.x,b.x+b.w)))-x,h:Math.max(...boxes.map(b=>Math.max(b.y,b.y+b.h)))-y}}
 const groupTools=document.createElement('div');groupTools.id='groupTools';groupTools.hidden=true;groupTools.innerHTML='<span id="groupCount"></span><button type="button" id="duplicateGroup">⧉ ทำสำเนา</button><button type="button" id="deleteGroup">⌫ ลบที่เลือก</button>';$('#canvasWrap').append(groupTools);
 const renderSingleSelection=renderSelection;
