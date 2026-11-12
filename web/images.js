@@ -1,6 +1,6 @@
 const imageTools=document.createElement('div');imageTools.id='imageTools';imageTools.hidden=true;imageTools.innerHTML='<span>รูปภาพ</span><button type="button" id="cropImage">⌗ ครอบภาพ</button><button type="button" id="removeBackground">✦ ลบพื้นหลัง</button><button type="button" id="downloadImage">↧ บันทึกรูป</button>';$('#canvasWrap').append(imageTools);
 const originalRenderSelection=renderSelection;renderSelection=function(){originalRenderSelection();imageTools.hidden=!page().objects.some(o=>o.id===selected&&o.type==='image')};
-const originalDoubleClick=$('#canvas').ondblclick;$('#canvas').ondblclick=e=>{const o=page().objects.find(o=>o.id===e.target.closest('[data-id]')?.dataset.id);if(o?.type==='image'&&tool==='select'){selected=o.id;openImageEditor('crop')}else originalDoubleClick(e)};
+const originalDoubleClick=$('#canvas').ondblclick;$('#canvas').ondblclick=e=>{const o=doubleClickObject(e);if(o?.type==='image'&&tool==='select'){selected=o.id;openImageEditor('crop')}else originalDoubleClick(e)};
 function isGifSource(src){return /^data:image\/gif;base64,/i.test(src)}
 function decodeImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('อ่านรูปภาพไม่ได้'));img.src=src})}
 function fileData(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
