@@ -18,7 +18,7 @@ async function syncCloud(initial=false){
    const before=changeCounter,d=await readCloud();
    if(cloudUser&&cloudUser!==d.user){try{localStorage.setItem('folio-other-account-backup',JSON.stringify(state))}catch{}cloudDirty=false;cloudEtag=null;if(d.state)adoptCloud(d.state);else{const books=demo();adoptCloud({books,bookId:books[0].id,pageId:books[0].pages[0].id})}}
    cloudUser=d.user;
-   if(changeCounter!==before){cloudReady=true;return}
+   if(changeCounter!==before||drag||$('#modal').open||(typeof activeInput!=='undefined'&&activeInput)||(typeof navigationGesture!=='undefined'&&navigationGesture)){cloudReady=true;return}
    if(d.state){if(cloudDirty){const merged=mergeBooks(d.state,state);adoptCloud(merged.state);if(merged.copies)toast('เก็บงานที่ต่างกันเป็นสมุดสำเนาแล้ว')}else if(d.etag!==cloudEtag||initial)adoptCloud(d.state)}
    else cloudDirty=true;
    cloudEtag=d.etag;cloudReady=true;meta();
