@@ -4,7 +4,7 @@ import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 fs.mkdirSync('dist/server',{recursive:true});
 fs.mkdirSync('dist/.openai',{recursive:true});
-const assets={};for(const [route,type] of [['/','text/html; charset=utf-8'],['/app.js','text/javascript; charset=utf-8'],['/sync.js','text/javascript; charset=utf-8'],['/touch.js','text/javascript; charset=utf-8'],['/images.js','text/javascript; charset=utf-8'],['/style.css','text/css; charset=utf-8']])assets[route]={type,body:fs.readFileSync('web/'+(route==='/'?'index.html':route.slice(1)),'utf8')};
+const assets={};for(const [route,type] of [['/','text/html; charset=utf-8'],['/app.js','text/javascript; charset=utf-8'],['/sync.js','text/javascript; charset=utf-8'],['/touch.js','text/javascript; charset=utf-8'],['/images.js','text/javascript; charset=utf-8'],['/selection.js','text/javascript; charset=utf-8'],['/style.css','text/css; charset=utf-8']])assets[route]={type,body:fs.readFileSync('web/'+(route==='/'?'index.html':route.slice(1)),'utf8')};
 assets['/LICENSE.txt']={type:'text/plain; charset=utf-8',body:fs.readFileSync('LICENSE','utf8')};
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'folio-source-')),archive=path.join(temp,'source.tar.gz');
 try{execFileSync(process.platform==='win32'?'tar.exe':'tar',['-czf',archive,'LICENSE','THIRD_PARTY_NOTICES.md','package.json','web','worker','scripts','tests','.openai/hosting.json'],{windowsHide:true});assets['/source.tar.gz']={type:'application/gzip',binary:true,body:fs.readFileSync(archive).toString('base64')}}finally{if(fs.existsSync(archive))fs.unlinkSync(archive);fs.rmdirSync(temp)}
