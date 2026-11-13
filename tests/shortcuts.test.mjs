@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const model=fs.readFileSync('web/editor-model.js','utf8');
+function setup(){let listener,modal=false;const calls=[],c=vm.createContext({document:{addEventListener:(name,fn)=>listener=fn},$:()=>({open:modal}),history:reverse=>calls.push(reverse),editingField:target=>!!target.closest(),addEditableText:()=>assert.fail('must not insert text')});vm.runInContext(model,c);vm.runInContext(fs.readFileSync('web/editor.js','utf8').split('\n').find(l=>l.startsWith("document.addEventListener('keydown'")),c);return{c,calls,modal:value=>modal=value,press:(overrides={})=>{const e={key:'z',code:'KeyZ',ctrlKey:true,target:{closest:()=>null},preventDefault(){this.prevented=true},stopImmediatePropagation(){this.stopped=true},...overrides};listener(e);return e}}}
+const field=(tagName,type)=>({tagName,type,closest(){return this}});
+test('Thai keyboard Ctrl+Z routes exactly one undo and prevents browser handling',()=>{const s=setup(),e=s.press({key:'ผ',code:'KeyZ'});assert.deepEqual(s.calls,[false]);assert.equal(e.prevented,true);assert.equal(e.stopped,true)});
+test('Thai redo works with Ctrl+Shift+Z, Ctrl+Y and Command+Shift+Z',()=>{const s=setup();s.press({key:'ผ',shiftKey:true});s.press({key:'ั',code:'KeyY'});s.press({key:'ผ',ctrlKey:false,metaKey:true,shiftKey:true});assert.deepEqual(s.calls,[true,true,true])});
+test('Latin shortcut keys and non-QWERTY letter layouts retain their meaning',()=>{const s=setup();s.press();s.press({key:'Z',shiftKey:true});s.press({key:'z',code:'KeyW'});assert.deepEqual(s.calls,[false,true,false])});
+test('focused style selectors and non-text inputs do not swallow canvas undo',()=>{for(const target of [field('SELECT'),field('INPUT','color'),field('INPUT','range'),field('INPUT','checkbox')]){const s=setup(),e=s.press({key:'ผ',target});assert.deepEqual(s.calls,[false]);assert.equal(e.prevented,true)}});
+test('typing fields keep native text undo and never undo the canvas behind them',()=>{for(const target of [field('TEXTAREA'),field('INPUT','text'),field('INPUT','number'),{tagName:'SPAN',isContentEditable:true,closest(){return this}}]){const s=setup(),e=s.press({key:'ผ',target});assert.deepEqual(s.calls,[]);assert.equal(e.prevented,undefined)}});
+test('modal editing, IME composition, AltGraph and unmodified keys cannot trigger canvas history',()=>{const s=setup();s.modal(true);s.press({key:'ผ'});s.modal(false);s.press({key:'ผ',isComposing:true});s.press({key:'Process',keyCode:229});s.press({key:'ผ',altKey:true});s.press({key:'ผ',ctrlKey:false});assert.deepEqual(s.calls,[])});
